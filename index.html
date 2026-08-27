@@ -11,7 +11,67 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#7C3AED">
+    <script>
+// Android Bridge - Gallery Save
+class AndroidBridge {
+    constructor() {
+        this.isAndroid = /android/i.test(navigator.userAgent);
+        this.bridge = window.AndroidBridge || null;
+    }
     
+    async saveVideo(blob, filename) {
+        if (!this.isAndroid) {
+            // Desktop fallback
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            return true;
+        }
+        
+        // Android - Try multiple methods
+        try {
+            // Method 1: Native Bridge
+            if (this.bridge) {
+                const reader = new FileReader();
+                const data = await new Promise((resolve) => {
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(blob);
+                });
+                this.bridge.saveToGallery(data, filename);
+                showToast('✅ Saved to Gallery!', 2000);
+                return true;
+            }
+            
+            // Method 2: Download Manager
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            
+            // Method 3: Share API (Android 10+)
+            if (navigator.share) {
+                const file = new File([blob], filename, { type: 'video/mp4' });
+                await navigator.share({
+                    files: [file],
+                    title: 'ZUBI Downloader'
+                });
+                return true;
+            }
+            
+            showToast('✅ Saved to Downloads!', 2000);
+            return true;
+            
+        } catch(e) {
+            showToast('❌ Error saving: ' + e.message, 3000);
+            return false;
+        }
+    }
+}
+
+// Initialize
+const androidBridge = new AndroidBridge();
+    </script>
     <style>
         * {
             margin: 0;
