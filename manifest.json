@@ -19,6 +19,34 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "https://zubair-lol-007.github.io/zubi-web/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://zubair-lol-007.github.io/zubi-web/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
+{
+  "screenshots": [
+    {
+      "src": "https://zubair-lol-007.github.io/zubi-web/screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "label": "Home Screen"
+    },
+    {
+      "src": "https://zubair-lol-007.github.io/zubi-web/screenshot2.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "label": "Download Screen"
     }
   ]
 }
