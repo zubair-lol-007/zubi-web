@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>⚡ ZUBI Downloader</title>
+    <!-- Add this inside <head> -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#7C3AED">
+
+<!-- Service Worker Register -->
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/zubi-web/sw.js')
+        .then(reg => console.log('SW registered:', reg))
+        .catch(err => console.log('SW error:', err));
+}
+</script>
     <style>
         * {
             margin: 0;
