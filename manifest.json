@@ -1,7 +1,8 @@
 {
+  "id": "zubi-downloader",
   "name": "ZUBI Downloader",
   "short_name": "ZUBI",
-  "description": "Download TikTok, Instagram, Facebook videos without watermark",
+  "description": "Download TikTok, Instagram, Facebook videos without watermark - Free & Fast",
   "start_url": "https://zubair-lol-007.github.io/zubi-web/",
   "display": "standalone",
   "background_color": "#0F0F1A",
@@ -9,44 +10,24 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://zubair-lol-007.github.io/zubi-web/icon-192.png",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⚡%3C/text%3E%3C/svg%3E",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "https://zubair-lol-007.github.io/zubi-web/icon-512.png",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⚡%3C/text%3E%3C/svg%3E",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
-    },
-    {
-      "src": "https://zubair-lol-007.github.io/zubi-web/icon-144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://zubair-lol-007.github.io/zubi-web/icon-96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any"
     }
-  ]
-}
-{
+  ],
   "screenshots": [
     {
-      "src": "https://zubair-lol-007.github.io/zubi-web/screenshot1.png",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1080 1920'%3E%3Crect width='1080' height='1920' fill='%230F0F1A'/%3E%3Ctext x='540' y='960' font-size='60' text-anchor='middle' fill='%239F5FFB'%3E⚡ ZUBI%3C/text%3E%3C/svg%3E",
       "sizes": "1080x1920",
-      "type": "image/png",
-      "label": "Home Screen"
-    },
-    {
-      "src": "https://zubair-lol-007.github.io/zubi-web/screenshot2.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "label": "Download Screen"
+      "type": "image/svg+xml",
+      "label": "ZUBI Downloader"
     }
   ]
 }
