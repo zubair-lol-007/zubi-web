@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ZUBI Downloader</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0F0F1A;
+            color: white;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 16px;
+        }
+        .container {
+            max-width: 450px;
+            width: 100%;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            background: #1A1A2E;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 14px;
+            border: 1px solid #2a2a4a;
+        }
+        .header h1 { font-size: 26px; font-weight: 800; }
+        .purple { color: #9F5FFB; }
+        .pink   { color: #EC4899; }
+        .header p { color: #64748B; font-size: 12px; margin-top: 4px; }
+
+        /* ── CARDS ── */
+        .card {
+            background: #1A1A2E;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #2a2a4a;
+        }
+        .card-label {
+            font-size: 12px;
+            color: #9F5FFB;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── INPUT ── */
+        .url-input {
+            width: 100%;
+            padding: 13px 14px;
+            background: #252540;
+            border: 2px solid #333355;
+            border-radius: 12px;
+            color: white;
+            font-size: 13px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .url-input:focus { border-color: #9F5FFB; }
+        .url-input::placeholder { color: #475569; }
+
+        /* ── PLATFORM BUTTONS ── */
+        .plat-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .plat-btn {
+            padding: 10px 4px;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            border: 2px solid transparent;
+        }
+        .plat-btn:active { transform: scale(0.96); }
+        .plat-btn.active { border-color: #fff; opacity: 1 !important; }
+        .tt { background: #1a1a1a; }
+        .ig { background: linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045); }
+        .fb { background: #1877F2; }
+
+        /* ── DOWNLOAD BUTTON ── */
+        .dl-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #7C3AED, #9F5FFB);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-size: 17px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            letter-spacing: 0.3px;
+            margin-bottom: 12px;
+        }
+        .dl-btn:active { transform: scale(0.98); }
+        .dl-btn:disabled { opacity: 0.5; cursor: default; }
+
+        /* ── PROGRESS ── */
+        .progress-wrap { margin-bottom: 12px; display: none; }
+        .progress-bar-bg {
+            background: #252540;
+            border-radius: 8px;
+            height: 8px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #7C3AED, #EC4899);
+            height: 100%;
+            border-radius: 8px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .progress-text { font-size: 11px; color: #64748B; text-align: center; }
+
+        /* ── STATS ── */
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .stat {
+            background: #252540;
+            border-radius: 12px;
+            padding: 12px 6px;
+            text-align: center;
+        }
+        .stat-val { color: #9F5FFB; font-size: 17px; font-weight: 800; }
+        .stat-lbl { color: #64748B; font-size: 10px; margin-top: 2px; }
+
+        /* ── LOG ── */
+        .log-box {
+            background: #0d0d1a;
+            border-radius: 12px;
+            padding: 12px;
+            max-height: 160px;
+            overflow-y: auto;
+            font-size: 12px;
+            border: 1px solid #1e1e3a;
+        }
+        .log-line { padding: 3px 0; border-bottom: 1px solid #1a1a2e; }
+        .log-line:last-child { border: none; }
+        .c-purple { color: #9F5FFB; }
+        .c-green  { color: #10B981; }
+        .c-red    { color: #EF4444; }
+        .c-teal   { color: #06B6D4; }
+        .c-gray   { color: #64748B; }
+        .c-yellow { color: #F59E0B; }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #1A1A2E;
+            border: 1px solid #333;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 9999;
+            transition: transform 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 8px 32px #0008;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* ── HOW TO USE ── */
+        .how {
+            background: #1A1A2E;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+            border: 1px solid #9F5FFB33;
+        }
+        .how-title { color: #9F5FFB; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+        .how-step { font-size: 12px; color: #94A3B8; padding: 3px 0; }
+        .how-step span { color: #EC4899; font-weight: 700; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <h1><span class="purple">⚡ ZUBI</span> <span class="pink">Downloader</span></h1>
+        <p>TikTok &nbsp;•&nbsp; Instagram &nbsp;•&nbsp; Facebook &nbsp;•&nbsp; No Watermark</p>
+    </div>
+
+    <!-- How to use -->
+    <div class="how">
+        <div class="how-title">📖 Kaise Use Karein</div>
+        <div class="how-step"><span>1.</span> Video ka link copy karo</div>
+        <div class="how-step"><span>2.</span> Neeche paste karo</div>
+        <div class="how-step"><span>3.</span> Download dabao</div>
+        <div class="how-step"><span>4.</span> Video khulegi → <b style="color:#10B981">3 dots → Download</b> karo</div>
+    </div>
+
+    <!-- URL Input -->
+    <div class="card">
+        <div class="card-label">📎 Video Link</div>
+        <input class="url-input" id="urlInput"
+               type="url" inputmode="url"
+               placeholder="TikTok / Instagram / Facebook link yahan paste karo…">
+    </div>
+
+    <!-- Platform buttons -->
+    <div class="plat-row">
+        <button class="plat-btn tt" onclick="selectPlat('tiktok',this)">🎵 TikTok</button>
+        <button class="plat-btn ig" onclick="selectPlat('instagram',this)">📸 Instagram</button>
+        <button class="plat-btn fb" onclick="selectPlat('facebook',this)">👍 Facebook</button>
+    </div>
+
+    <!-- Download button -->
+    <button class="dl-btn" id="dlBtn" onclick="startDownload()">⬇ &nbsp;Download Video</button>
+
+    <!-- Progress -->
+    <div class="progress-wrap" id="progressWrap">
+        <div class="progress-bar-bg">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-text" id="progressText">Processing…</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-val" id="statCount">0</div>
+            <div class="stat-lbl">Downloaded</div>
+        </div>
+        <div class="stat">
+            <div class="stat-val" id="statSize">0 MB</div>
+            <div class="stat-lbl">Total Size</div>
+        </div>
+        <div class="stat">
+            <div class="stat-val">📁</div>
+            <div class="stat-lbl">ZUBI</div>
+        </div>
+    </div>
+
+    <!-- Log -->
+    <div class="card">
+        <div class="card-label">📋 Activity Log</div>
+        <div class="log-box" id="logBox">
+            <div class="log-line c-purple">⚡ ZUBI Downloader ready!</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ─────────────────────────────────────────
+let selPlat = null;
+let busy    = false;
+let dlCount = 0;
+let dlBytes = 0;
+
+const urlInput    = document.getElementById('urlInput');
+const dlBtn       = document.getElementById('dlBtn');
+const logBox      = document.getElementById('logBox');
+const toast       = document.getElementById('toast');
+const progressWrap= document.getElementById('progressWrap');
+const progressBar = document.getElementById('progressBar');
+const progressText= document.getElementById('progressText');
+const statCount   = document.getElementById('statCount');
+const statSize    = document.getElementById('statSize');
+
+// ── HELPERS ───────────────────────────────────────
+function log(msg, cls='c-gray') {
+    const d = document.createElement('div');
+    d.className = 'log-line ' + cls;
+    d.textContent = msg;
+    logBox.appendChild(d);
+    logBox.scrollTop = logBox.scrollHeight;
+}
+
+let toastTimer;
+function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function setProgress(pct, txt) {
+    progressWrap.style.display = 'block';
+    progressBar.style.width = pct + '%';
+    progressText.textContent = txt || pct + '%';
+}
+
+function hideProgress() {
+    setTimeout(() => {
+        progressWrap.style.display = 'none';
+        progressBar.style.width = '0%';
+    }, 1500);
+}
+
+function updateStats() {
+    statCount.textContent = dlCount;
+    const mb = dlBytes / 1048576;
+    statSize.textContent = mb < 1 ? Math.round(mb*1024) + ' KB' : mb.toFixed(1) + ' MB';
+}
+
+function selectPlat(p, btn) {
+    selPlat = p;
+    document.querySelectorAll('.plat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const names = {tiktok:'TikTok', instagram:'Instagram', facebook:'Facebook'};
+    showToast('✅ ' + names[p] + ' selected');
+}
+
+function detectPlat(url) {
+    const u = url.toLowerCase();
+    if (u.includes('tiktok.com') || u.includes('vm.tiktok') || u.includes('vt.tiktok')) return 'tiktok';
+    if (u.includes('instagram.com') || u.includes('instagr.am')) return 'instagram';
+    if (u.includes('facebook.com') || u.includes('fb.watch') || u.includes('fb.com')) return 'facebook';
+    return null;
+}
+
+// ── OPEN VIDEO IN NEW TAB (works in WebView + Browser) ───────────────────────
+// Strategy: get direct video URL → open it → user taps 3-dots → Download
+function openVideoUrl(videoUrl, platform) {
+    const ts  = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+    const name= `ZUBI_${platform.toUpperCase()}_${ts}.mp4`;
+
+    log('🎬 Video link mil gayi!', 'c-green');
+    log('📥 Video khul rahi hai…', 'c-teal');
+
+    // Try anchor download first (works in browser)
+    try {
+        const a  = document.createElement('a');
+        a.href   = videoUrl;
+        a.download = name;
+        a.target = '_blank';
+        a.rel    = 'noopener';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    } catch(e) {}
+
+    // Also open directly (works in WebView)
+    setTimeout(() => {
+        window.open(videoUrl, '_blank');
+    }, 300);
+
+    log('✅ Video open hui! 3-dots → Download dabao', 'c-green');
+    showToast('✅ Video open! Download karo 3-dots se');
+
+    dlCount++;
+    updateStats();
+    return true;
+}
+
+// ── TIKTOK ───────────────────────────────────────
+async function dlTikTok(url) {
+    // Method 1: tikwm API (most reliable, no CORS issue)
+    const apis = [
+        'https://www.tikwm.com/api/',
+        'https://api.tikwm.com/',
+    ];
+
+    for (const api of apis) {
+        try {
+            setProgress(20, 'TikTok API se fetch kar raha…');
+            log('  ▶ tikwm try kar raha…', 'c-gray');
+
+            const r = await fetch(`${api}?url=${encodeURIComponent(url)}&hd=1`);
+            const d = await r.json();
+
+            if (d.code === 0 && d.data) {
+                const vurl = d.data.hdplay || d.data.play;
+                const title = d.data.title || '';
+                if (vurl) {
+                    if (title) log('  Title: ' + title.substring(0,50), 'c-gray');
+                    setProgress(80, 'Video ready!');
+                    return openVideoUrl(vurl, 'tiktok');
+                }
+            }
+        } catch(e) {
+            log('  tikwm failed: ' + e.message, 'c-yellow');
+        }
+    }
+
+    // Method 2: ssstik proxy
+    try {
+        setProgress(40, 'Backup method try…');
+        log('  ▶ ssstik try kar raha…', 'c-gray');
+
+        const r = await fetch('https://ssstik.io/abc?url=' + encodeURIComponent(url), {
+            headers: {'HX-Request': 'true', 'HX-Current-URL': 'https://ssstik.io/'}
+        });
+        const html = await r.text();
+        const match = html.match(/href="(https?:\/\/[^"]+\.mp4[^"]*)"/);
+        if (match) {
+            setProgress(80, 'Video ready!');
+            return openVideoUrl(match[1], 'tiktok');
+        }
+    } catch(e) {
+        log('  ssstik failed', 'c-yellow');
+    }
+
+    throw new Error('TikTok: koi method kaam nahi kiya');
+}
+
+// ── INSTAGRAM ────────────────────────────────────
+async function dlInstagram(url) {
+    // Method: igram API
+    try {
+        setProgress(30, 'Instagram fetch kar raha…');
+        log('  ▶ igram.world try kar raha…', 'c-gray');
+
+        const r = await fetch('https://igram.world/api/convert', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Referer': 'https://igram.world/'
+            },
+            body: JSON.stringify({url: url, lang: 'en'})
+        });
+        const d = await r.json();
+        const medias = d.media || d.data || [];
+        for (const m of medias) {
+            const vurl = m.url || m.src;
+            if (vurl && vurl.includes('.mp4')) {
+                setProgress(80, 'Video ready!');
+                return openVideoUrl(vurl, 'instagram');
+            }
+        }
+    } catch(e) {
+        log('  igram failed: ' + e.message, 'c-yellow');
+    }
+
+    // Method 2: reelsaver
+    try {
+        log('  ▶ reelsaver try kar raha…', 'c-gray');
+        const r = await fetch('https://reelsaver.net/api/download', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'url=' + encodeURIComponent(url)
+        });
+        const d = await r.json();
+        if (d.url || d.video) {
+            return openVideoUrl(d.url || d.video, 'instagram');
+        }
+    } catch(e) {
+        log('  reelsaver failed', 'c-yellow');
+    }
+
+    throw new Error('Instagram: koi method kaam nahi kiya');
+}
+
+// ── FACEBOOK ─────────────────────────────────────
+async function dlFacebook(url) {
+    try {
+        setProgress(30, 'Facebook fetch kar raha…');
+        log('  ▶ savefrom try kar raha…', 'c-gray');
+
+        const r = await fetch(
+            'https://worker.zubair-lol-007.workers.dev/fb?url=' + encodeURIComponent(url)
+        ).catch(() => null);
+
+        if (r && r.ok) {
+            const d = await r.json();
+            if (d.url) {
+                setProgress(80, 'Video ready!');
+                return openVideoUrl(d.url, 'facebook');
+            }
+        }
+    } catch(e) {}
+
+    // Fallback: open getfvid in new tab
+    log('  ▶ getfvid.com par redirect kar raha…', 'c-yellow');
+    const getfvidUrl = 'https://getfvid.com/?url=' + encodeURIComponent(url);
+    window.open(getfvidUrl, '_blank');
+    showToast('📂 getfvid.com khula — wahan se download karo');
+    log('✅ getfvid.com mein download karo', 'c-green');
+    dlCount++;
+    updateStats();
+    return true;
+}
+
+// ── MAIN ─────────────────────────────────────────
+async function startDownload() {
+    if (busy) { showToast('⏳ Already downloading…'); return; }
+
+    const url = urlInput.value.trim();
+    if (!url) { showToast('✗ Link paste karo pehle!'); log('✗ URL empty hai', 'c-red'); return; }
+
+    const p = selPlat || detectPlat(url);
+    if (!p) { showToast('✗ TikTok/Instagram/Facebook link chahiye'); return; }
+
+    busy = true;
+    dlBtn.disabled = true;
+    dlBtn.textContent = '⏳ Downloading…';
+    setProgress(10, 'Shuru ho raha…');
+
+    const names = {tiktok:'TikTok', instagram:'Instagram', facebook:'Facebook'};
+    log('\n▶ [' + names[p] + '] Download shuru…', 'c-teal');
+
+    try {
+        if (p === 'tiktok')    await dlTikTok(url);
+        if (p === 'instagram') await dlInstagram(url);
+        if (p === 'facebook')  await dlFacebook(url);
+        setProgress(100, 'Complete! ✓');
+        hideProgress();
+        urlInput.value = '';
+    } catch(e) {
+        log('✗ ' + e.message, 'c-red');
+        showToast('✗ ' + e.message);
+        hideProgress();
+    }
+
+    busy = false;
+    dlBtn.disabled = false;
+    dlBtn.textContent = '⬇  Download Video';
+}
+
+// ── ENTER KEY ────────────────────────────────────
+urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') startDownload(); });
+
+// ── INIT ─────────────────────────────────────────
+log('📱 Device: ' + (navigator.userAgent.includes('Android') ? 'Android' : 'Other'), 'c-gray');
+log('💡 Tip: Video khulne par 3-dots → Download karo', 'c-purple');
+updateStats();
+</script>
+</body>
+</html>
