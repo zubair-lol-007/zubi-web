@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ZUBI Downloader</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0F0F1A;
+            color: white;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            padding: 14px;
+        }
+        .header {
+            background: #1A1A2E;
+            border-radius: 18px;
+            padding: 18px;
+            text-align: center;
+            margin-bottom: 12px;
+            border: 1px solid #2a2a4a;
+        }
+        .header h1 { font-size: 24px; font-weight: 800; }
+        .purple { color: #9F5FFB; }
+        .pink   { color: #EC4899; }
+        .header p { color: #64748B; font-size: 11px; margin-top: 3px; }
+
+        .card {
+            background: #1A1A2E;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 10px;
+            border: 1px solid #2a2a4a;
+        }
+        .card-label {
+            font-size: 11px; color: #9F5FFB;
+            font-weight: 700; margin-bottom: 8px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .url-input {
+            width: 100%; padding: 12px 13px;
+            background: #252540;
+            border: 2px solid #333355;
+            border-radius: 11px;
+            color: white; font-size: 13px; outline: none;
+        }
+        .url-input:focus { border-color: #9F5FFB; }
+        .url-input::placeholder { color: #475569; }
+
+        .plat-row {
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px; margin-bottom: 10px;
+        }
+        .plat-btn {
+            padding: 10px 4px; border: none; border-radius: 10px;
+            color: white; font-weight: 700; font-size: 12px;
+            cursor: pointer; border: 2px solid transparent;
+        }
+        .plat-btn.active { border-color: #fff; }
+        .tt { background: #1a1a1a; }
+        .ig { background: linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045); }
+        .fb { background: #1877F2; }
+
+        .dl-btn {
+            width: 100%; padding: 15px;
+            background: linear-gradient(135deg, #7C3AED, #9F5FFB);
+            border: none; border-radius: 13px;
+            color: white; font-size: 16px; font-weight: 800;
+            cursor: pointer; margin-bottom: 10px;
+        }
+        .dl-btn:disabled { opacity: 0.5; }
+
+        /* ── PROGRESS ── */
+        .prog-wrap { margin-bottom: 10px; display: none; }
+        .prog-bg { background: #252540; border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 5px; }
+        .prog-fill {
+            background: linear-gradient(90deg,#7C3AED,#EC4899);
+            height: 100%; border-radius: 8px; width: 0%;
+            transition: width 0.4s;
+        }
+        .prog-txt { font-size: 11px; color: #64748B; text-align: center; }
+
+        /* ── STATUS BOX ── */
+        .status-box {
+            background: #0d0d1a; border-radius: 12px;
+            padding: 14px; margin-bottom: 10px;
+            border: 1px solid #1e1e3a;
+            display: none; text-align: center;
+        }
+        .status-icon { font-size: 36px; margin-bottom: 8px; }
+        .status-msg  { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+        .status-sub  { font-size: 12px; color: #64748B; }
+
+        /* ── DIRECT SAVE BUTTON ── */
+        .save-btn {
+            display: none;
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, #10B981, #059669);
+            border: none; border-radius: 13px;
+            color: white; font-size: 15px; font-weight: 800;
+            cursor: pointer; margin-bottom: 10px;
+            text-decoration: none; text-align: center;
+        }
+
+        .stats {
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px; margin-bottom: 10px;
+        }
+        .stat {
+            background: #252540; border-radius: 11px;
+            padding: 10px 6px; text-align: center;
+        }
+        .stat-val { color: #9F5FFB; font-size: 16px; font-weight: 800; }
+        .stat-lbl { color: #64748B; font-size: 10px; margin-top: 2px; }
+
+        .log-box {
+            background: #0d0d1a; border-radius: 11px;
+            padding: 11px; max-height: 140px; overflow-y: auto;
+            font-size: 11px; border: 1px solid #1e1e3a;
+        }
+        .log-line { padding: 2px 0; border-bottom: 1px solid #1a1a2e; }
+        .log-line:last-child { border: none; }
+        .c-purple{color:#9F5FFB}.c-green{color:#10B981}.c-red{color:#EF4444}
+        .c-teal{color:#06B6D4}.c-gray{color:#64748B}.c-yellow{color:#F59E0B}
+
+        .toast {
+            position: fixed; bottom: 24px; left: 50%;
+            transform: translateX(-50%) translateY(70px);
+            background: #1A1A2E; border: 1px solid #333;
+            color: white; padding: 11px 20px;
+            border-radius: 12px; font-size: 13px; font-weight: 600;
+            z-index: 9999; transition: transform 0.3s;
+            white-space: nowrap; box-shadow: 0 8px 24px #0009;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1><span class="purple">⚡ ZUBI</span> <span class="pink">Downloader</span></h1>
+    <p>TikTok &nbsp;•&nbsp; Instagram &nbsp;•&nbsp; Facebook &nbsp;•&nbsp; No Watermark</p>
+</div>
+
+<div class="card">
+    <div class="card-label">📎 Video Link Paste Karo</div>
+    <input class="url-input" id="urlInput" type="url"
+           placeholder="TikTok / Instagram / Facebook link…">
+</div>
+
+<div class="plat-row">
+    <button class="plat-btn tt" onclick="selPlat('tiktok',this)">🎵 TikTok</button>
+    <button class="plat-btn ig" onclick="selPlat('instagram',this)">📸 Instagram</button>
+    <button class="plat-btn fb" onclick="selPlat('facebook',this)">👍 Facebook</button>
+</div>
+
+<button class="dl-btn" id="dlBtn" onclick="startDl()">⬇ &nbsp;Download Video</button>
+
+<div class="prog-wrap" id="progWrap">
+    <div class="prog-bg"><div class="prog-fill" id="progFill"></div></div>
+    <div class="prog-txt" id="progTxt">Processing…</div>
+</div>
+
+<!-- Status result box -->
+<div class="status-box" id="statusBox">
+    <div class="status-icon" id="statusIcon">⏳</div>
+    <div class="status-msg"  id="statusMsg">Processing…</div>
+    <div class="status-sub"  id="statusSub"></div>
+</div>
+
+<!-- Green SAVE button — direct download link -->
+<a class="save-btn" id="saveBtn" download>
+    💾 &nbsp;PHONE MEIN SAVE KARO
+</a>
+
+<div class="stats">
+    <div class="stat"><div class="stat-val" id="sCount">0</div><div class="stat-lbl">Downloaded</div></div>
+    <div class="stat"><div class="stat-val" id="sSize">0MB</div><div class="stat-lbl">Total Size</div></div>
+    <div class="stat"><div class="stat-val">📁</div><div class="stat-lbl">ZUBI</div></div>
+</div>
+
+<div class="card">
+    <div class="card-label">📋 Log</div>
+    <div class="log-box" id="logBox">
+        <div class="log-line c-purple">⚡ ZUBI Downloader ready!</div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+let activePlat = null;
+let busy       = false;
+let dlCount    = 0;
+let dlBytes    = 0;
+
+// ── ELEMENTS ───────────────────────────────────────────────────────────────
+const urlInput  = document.getElementById('urlInput');
+const dlBtn     = document.getElementById('dlBtn');
+const progWrap  = document.getElementById('progWrap');
+const progFill  = document.getElementById('progFill');
+const progTxt   = document.getElementById('progTxt');
+const statusBox = document.getElementById('statusBox');
+const statusIcon= document.getElementById('statusIcon');
+const statusMsg = document.getElementById('statusMsg');
+const statusSub = document.getElementById('statusSub');
+const saveBtn   = document.getElementById('saveBtn');
+const logBox    = document.getElementById('logBox');
+const toast     = document.getElementById('toast');
+const sCount    = document.getElementById('sCount');
+const sSize     = document.getElementById('sSize');
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+function log(msg, cls='c-gray') {
+    const d = document.createElement('div');
+    d.className = 'log-line ' + cls;
+    d.textContent = msg;
+    logBox.appendChild(d);
+    logBox.scrollTop = logBox.scrollHeight;
+}
+let toastT;
+function toast_(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => toast.classList.remove('show'), 3000);
+}
+function prog(pct, txt) {
+    progWrap.style.display = 'block';
+    progFill.style.width   = pct + '%';
+    progTxt.textContent    = txt || pct + '%';
+}
+function hideProg() {
+    setTimeout(() => { progWrap.style.display='none'; progFill.style.width='0%'; }, 1800);
+}
+function stats(bytes) {
+    dlCount++;
+    dlBytes += (bytes||0);
+    sCount.textContent = dlCount;
+    const mb = dlBytes/1048576;
+    sSize.textContent  = mb < 1 ? Math.round(mb*1024)+'KB' : mb.toFixed(1)+'MB';
+}
+function selPlat(p, btn) {
+    activePlat = p;
+    document.querySelectorAll('.plat-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    toast_('✅ ' + {tiktok:'TikTok',instagram:'Instagram',facebook:'Facebook'}[p] + ' selected');
+}
+function detectPlat(url) {
+    const u = url.toLowerCase();
+    if (u.includes('tiktok.com')||u.includes('vm.tiktok')||u.includes('vt.tiktok')) return 'tiktok';
+    if (u.includes('instagram.com')||u.includes('instagr.am')) return 'instagram';
+    if (u.includes('facebook.com')||u.includes('fb.watch')||u.includes('fb.com')) return 'facebook';
+    return null;
+}
+
+// ── KEY FUNCTION: show green save button ──────────────────────────────────
+// This sets an <a download href="..."> which triggers Android's DownloadManager
+function showSaveButton(videoUrl, platform, title) {
+    const ts   = Date.now();
+    const name = `ZUBI_${platform.toUpperCase()}_${ts}.mp4`;
+
+    // Set the anchor href + download attribute
+    saveBtn.href     = videoUrl;
+    saveBtn.download = name;
+    saveBtn.setAttribute('download', name);
+    saveBtn.style.display = 'block';
+
+    // Status box
+    statusBox.style.display = 'block';
+    statusIcon.textContent  = '🎬';
+    statusMsg.textContent   = '✅ Video Ready!';
+    statusSub.textContent   = title ? title.substring(0,60) : 'Download button dabao';
+
+    log('✅ Video URL mili! Save button dabao.', 'c-green');
+    toast_('✅ Video ready! Neeche Save button dabao');
+
+    // Also try direct trigger for browser
+    try {
+        const a = document.createElement('a');
+        a.href     = videoUrl;
+        a.download = name;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => document.body.removeChild(a), 500);
+    } catch(e) {}
+
+    stats(0);
+    return true;
+}
+
+// ── TIKTOK ────────────────────────────────────────────────────────────────
+async function dlTikTok(url) {
+    const apis = ['https://www.tikwm.com/api/', 'https://api.tikwm.com/'];
+    for (const api of apis) {
+        try {
+            prog(20, '🔍 TikTok video fetch kar raha…');
+            log('  ▶ tikwm API…', 'c-gray');
+            const r = await fetch(`${api}?url=${encodeURIComponent(url)}&hd=1`);
+            const d = await r.json();
+            if (d.code === 0 && d.data) {
+                const vurl  = d.data.hdplay || d.data.play;
+                const title = d.data.title || '';
+                if (vurl) {
+                    if (title) log('  Title: '+title.substring(0,50), 'c-gray');
+                    prog(90, '✅ Video ready!');
+                    return showSaveButton(vurl, 'tiktok', title);
+                }
+            }
+        } catch(e) { log('  tikwm failed: '+e.message,'c-yellow'); }
+    }
+    // ssstik fallback
+    try {
+        prog(50, 'ssstik try kar raha…');
+        log('  ▶ ssstik…', 'c-gray');
+        const r = await fetch('https://ssstik.io/abc?url='+encodeURIComponent(url), {
+            headers:{'HX-Request':'true','HX-Current-URL':'https://ssstik.io/'}
+        });
+        const html = await r.text();
+        const m = html.match(/href="(https?:\/\/[^"]+\.mp4[^"]*)"/);
+        if (m) { prog(90,'✅ Ready!'); return showSaveButton(m[1],'tiktok',''); }
+    } catch(e) { log('  ssstik failed','c-yellow'); }
+    throw new Error('TikTok: video nahi mili');
+}
+
+// ── INSTAGRAM ─────────────────────────────────────────────────────────────
+async function dlInstagram(url) {
+    // igram.world
+    try {
+        prog(30, '🔍 Instagram fetch kar raha…');
+        log('  ▶ igram.world…', 'c-gray');
+        const r = await fetch('https://igram.world/api/convert', {
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json',
+                'X-Requested-With':'XMLHttpRequest',
+                'Referer':'https://igram.world/'
+            },
+            body: JSON.stringify({url, lang:'en'})
+        });
+        const d = await r.json();
+        const medias = d.media || d.data || [];
+        for (const m of medias) {
+            const vurl = m.url || m.src;
+            if (vurl && vurl.includes('.mp4')) {
+                prog(90, '✅ Ready!');
+                return showSaveButton(vurl, 'instagram', '');
+            }
+        }
+    } catch(e) { log('  igram failed: '+e.message,'c-yellow'); }
+
+    // snapinsta token-free attempt
+    try {
+        prog(60, 'snapinsta try…');
+        log('  ▶ snapinsta…', 'c-gray');
+        const r = await fetch('https://snapinsta.app/action.php', {
+            method:'POST',
+            headers:{'Content-Type':'application/x-www-form-urlencoded'},
+            body:'url='+encodeURIComponent(url)+'&lang=en'
+        });
+        const txt = await r.text();
+        const m   = txt.match(/href="(https?:\/\/[^"]+\.mp4[^"]*)"/);
+        if (m) { prog(90,'✅ Ready!'); return showSaveButton(m[1],'instagram',''); }
+    } catch(e) { log('  snapinsta failed','c-yellow'); }
+
+    throw new Error('Instagram: video nahi mili');
+}
+
+// ── FACEBOOK ──────────────────────────────────────────────────────────────
+async function dlFacebook(url) {
+    // fdownloader API
+    try {
+        prog(30, '🔍 Facebook fetch kar raha…');
+        log('  ▶ fdownloader…', 'c-gray');
+        const r = await fetch('https://fdownloader.net/api/ajaxSearch', {
+            method:'POST',
+            headers:{'Content-Type':'application/x-www-form-urlencoded'},
+            body:'q='+encodeURIComponent(url)+'&lang=en'
+        });
+        const d = await r.json();
+        if (d.data) {
+            // parse HD link from HTML response
+            const m = d.data.match(/href="(https?:\/\/[^"]+\.mp4[^"]*)"/);
+            if (m) { prog(90,'✅ Ready!'); return showSaveButton(m[1],'facebook',''); }
+        }
+    } catch(e) { log('  fdownloader failed: '+e.message,'c-yellow'); }
+
+    // getfvid API
+    try {
+        prog(60, 'getfvid try…');
+        log('  ▶ getfvid…', 'c-gray');
+        const r = await fetch('https://getfvid.com/downloader', {
+            method:'POST',
+            headers:{'Content-Type':'application/x-www-form-urlencoded'},
+            body:'url='+encodeURIComponent(url)
+        });
+        const html = await r.text();
+        const m = html.match(/href="(https?:\/\/[^"]+\.mp4[^"]*)"/);
+        if (m) { prog(90,'✅ Ready!'); return showSaveButton(m[1],'facebook',''); }
+    } catch(e) { log('  getfvid failed','c-yellow'); }
+
+    throw new Error('Facebook: video nahi mili');
+}
+
+// ── MAIN ──────────────────────────────────────────────────────────────────
+async function startDl() {
+    if (busy) { toast_('⏳ Already downloading…'); return; }
+
+    const url = urlInput.value.trim();
+    if (!url) { toast_('✗ Link paste karo!'); return; }
+
+    const p = activePlat || detectPlat(url);
+    if (!p) { toast_('✗ TikTok/Instagram/Facebook link chahiye'); return; }
+
+    // Reset UI
+    busy = true;
+    dlBtn.disabled   = true;
+    dlBtn.textContent= '⏳ Processing…';
+    saveBtn.style.display  = 'none';
+    statusBox.style.display= 'none';
+    prog(5, 'Shuru ho raha…');
+
+    const names = {tiktok:'TikTok', instagram:'Instagram', facebook:'Facebook'};
+    log('\n▶ ['+names[p]+'] Download shuru…', 'c-teal');
+
+    try {
+        if (p==='tiktok')    await dlTikTok(url);
+        if (p==='instagram') await dlInstagram(url);
+        if (p==='facebook')  await dlFacebook(url);
+        hideProg();
+    } catch(e) {
+        log('✗ '+e.message, 'c-red');
+        toast_('✗ '+e.message);
+        statusBox.style.display = 'block';
+        statusIcon.textContent  = '❌';
+        statusMsg.textContent   = 'Download failed';
+        statusSub.textContent   = e.message + ' — internet check karo ya dobara try karo';
+        hideProg();
+    }
+
+    busy = false;
+    dlBtn.disabled   = false;
+    dlBtn.textContent= '⬇  Download Video';
+}
+
+urlInput.addEventListener('keydown', e => { if(e.key==='Enter') startDl(); });
+log('📱 Device ready — link paste karo aur download karo!', 'c-gray');
+</script>
+</body>
+</html>
